@@ -1,0 +1,50 @@
+name: CI for Bank and BankTests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies for Bank
+        run: dotnet restore Bank/Bank.csproj
+
+      - name: Restore dependencies for BankTests
+        run: dotnet restore BankTests/BankTests.csproj
+
+      - name: Build Bank project
+        run: dotnet build Bank/Bank.csproj --no-restore --configuration Release
+
+      - name: Build BankTests project
+        run: dotnet build BankTests/BankTests.csproj --no-restore --configuration Release
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies for BankTests
+        run: dotnet restore BankTests/BankTests.csproj
+
+      - name: Run tests
+        run: dotnet test BankTests/BankTests.csproj --no-build --configuration Release
